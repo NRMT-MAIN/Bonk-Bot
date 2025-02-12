@@ -1,6 +1,14 @@
 const mongoose = require("mongoose") ;
+const { DATABASE_URL } = require("./config");
 
-mongoose.connect()
+
+try{
+    mongoose.connect(DATABASE_URL)
+    console.log("Database Connected")
+} catch( err ){
+    console.log( err )
+}
+
 
 const UserSchema = mongoose.Schema({
     username  : String ,
@@ -9,7 +17,7 @@ const UserSchema = mongoose.Schema({
     publicKey : String
 })
 
-const userModel = mongoose.Model("users" , UserSchema ) ;
+const userModel = mongoose.model("users" , UserSchema ) ;
 
 module.exports = {
     userModel
