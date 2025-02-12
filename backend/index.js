@@ -6,8 +6,11 @@ const jwt = require("jsonwebtoken");
 const { Keypair } = require('@solana/web3.js');
 const { JWT_SECRET } = require('./config');
 
+const cors = require('cors');
+
 const app = express() ; 
-app.use(express.json())
+app.use(express.json()) ;
+app.use(cors())
 
 const requiredBody  = z.object({
     username : z.string().min(3).max(20),
@@ -97,8 +100,30 @@ app.post("/api/v1/signin" , async ( req , res ) => {
     } 
 }) 
 
-app.post("/api/v1/txn/sign" , ( req , res ) => {
+app.post("/api/v1/user" , async ( req , res ) => {
+    const token = req.headers.token ; 
 
+    const verifiedToken = jwt.verify( token , JWT_SECRET ) ;
+
+    if( !verifiedToken ){
+        return res.status(403).json({
+            message : "Invalid Token"
+        })
+    }
+
+    const user = await userModel.findOne({
+        username : verifiedToken.userId
+    })
+    return res.json({
+        publicKey : user.publicKey ,
+        privateKey : user.privateKey 
+    })
+})
+
+app.post("/api/v1/txn/sign" , async ( req , res ) => {
+    const serializedTransaction = req.body.message ; 
+
+    const txn = Transaction.from(Buffer.from(serializedTransaction)) ; 
 }) 
 
 app.listen( 3000 , async () => {
